@@ -1,10 +1,12 @@
+import cors from "cors";
 import express from 'express';
 import path from 'path';
 import logger from 'morgan';
-import bodyParser from 'body-parser';
+import errorHandler from "./handlers/error";
 import routes from './routes';
 
 const app = express();
+app.use(cors());
 app.disable('x-powered-by');
 
 // View engine setup
@@ -14,12 +16,14 @@ app.set('view engine', 'pug');
 app.use(logger('dev', {
   skip: () => app.get('env') === 'test'
 }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(express.urlencoded({
+  extended: true,
+}));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
-app.use('/', routes);
+app.use('/users', routes.user);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
@@ -28,13 +32,6 @@ app.use((req, res, next) => {
   next(err);
 });
 
-// Error handler
-app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
-  res
-    .status(err.status || 500)
-    .render('error', {
-      message: err.message
-    });
-});
+app.use(errorHandler);
 
 export default app;
