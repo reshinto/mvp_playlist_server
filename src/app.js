@@ -5,6 +5,12 @@ import path from 'path';
 import logger from 'morgan';
 import errorHandler from "./handlers/error";
 import routes from './routes';
+import pool from "./config/db";
+
+// Initialise postgres client
+pool.on("error", function(err) {
+  console.log("idle client error", err.message, err.stack);
+});
 
 const app = express();
 app.use(cors());
