@@ -3,6 +3,7 @@ import cors from "cors";
 import express from 'express';
 import path from 'path';
 import logger from 'morgan';
+import cookieParser from "cookie-parser";
 import errorHandler from "./handlers/error";
 import routes from './routes';
 import pool from "./config/db";
@@ -14,6 +15,7 @@ pool.on("error", function(err) {
 
 const app = express();
 app.use(cors());
+app.use(cookieParser())
 app.disable('x-powered-by');
 
 // View engine setup
