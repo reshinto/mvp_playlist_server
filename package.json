@@ -1,8 +1,8 @@
 {
   "name": "project-2-backend-server",
   "version": "1.0.0",
-  "description": "Using latest JavaScript features on the server",
-  "repository": "https://github.com/vmasto/express-babel",
+  "description": "",
+  "repository": "https://github.com/reshinto/project-2-backend-server",
   "main": "dist/index.js",
   "engines": {
     "node": "~10.15.1",
