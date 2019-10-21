@@ -46,7 +46,6 @@ router.post("/register", (req, res) => {
       pool.query(queryText, values, (err, result) => {
         const user_id = result.rows[0].id;
         const hashedCookie = sha256(user_id + SALT);
-        res.cookie("user_id", user_id);
         res.cookie("token", hashedCookie);
         res.status(200).send({message: 'Registered successfuly!'});
       })
@@ -70,7 +69,6 @@ router.post("/login", (req, res) => {
         if ( hashedRequestPassword === result.rows[0].password ) {
           const user_id = result.rows[0].id;
           const hashedCookie = sha256(user_id + SALT);
-          res.cookie("user_id", user_id);
           res.cookie("token", hashedCookie);
           // if it matches they have been verified, log them in
           res.status(200).send({message: 'Login successfuly!'});
@@ -83,5 +81,10 @@ router.post("/login", (req, res) => {
     }
   });
 });
+
+router.get("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.status(200).send({message: 'Logout successfuly!'});
+})
 
 export default router;
