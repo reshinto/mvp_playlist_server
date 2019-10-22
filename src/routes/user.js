@@ -21,6 +21,7 @@ router.get('/', (req, res) => {
 });
 
 router.post("/register", (req, res) => {
+  console.log(req.body)
   const {username, email, password} = req.body;
   const getBlanks = checkBlanks(req);
   if (getBlanks !== null) {
