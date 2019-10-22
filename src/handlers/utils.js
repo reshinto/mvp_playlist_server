@@ -16,7 +16,7 @@ function validateEmail(email) {
 }
 
 async function validation(pool, req, res) {
-  const getUserId = req.cookies["token"];
+  const getUserId = req.headers.authorization
   let queryText = "SELECT user_id FROM songs";
   const result = await pool.query(queryText)
   return verifyUser(getUserId, result);

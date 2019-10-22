@@ -46,9 +46,8 @@ router.post("/register", (req, res) => {
       values = [username]
       pool.query(queryText, values, (err, result) => {
         const user_id = result.rows[0].id;
-        const hashedCookie = sha256(user_id + SALT);
-        res.cookie("token", hashedCookie);
-        res.status(200).send({message: 'Registered successfuly!'});
+        const token = sha256(user_id + SALT);
+        res.status(200).send({bearer: token});
       })
     }
   });
@@ -69,10 +68,8 @@ router.post("/login", (req, res) => {
         // check to see if the password in request.body matches what's in the db
         if ( hashedRequestPassword === result.rows[0].password ) {
           const user_id = result.rows[0].id;
-          const hashedCookie = sha256(user_id + SALT);
-          res.cookie("token", hashedCookie);
-          // if it matches they have been verified, log them in
-          res.status(200).send({message: 'Login successfuly!'});
+          const token = sha256(user_id + SALT);
+          res.status(200).send({bearer: token});
         } else {
           res.status(403).send({message: "Invalid password!"});
         }
