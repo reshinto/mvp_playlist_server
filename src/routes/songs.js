@@ -1,6 +1,6 @@
 import {Router as route} from "express";
 import pool from "../config/db";
-import {validation, checkSongDuplicates} from "../handlers/utils";
+import {validation, checkSongDuplicates, embedURL} from "../handlers/utils";
 
 const router = route();
 
@@ -20,7 +20,10 @@ router.get("/songs", async (req, res) => {
 
 router.post("/songs", async (req, res) => {
   const user_id = await validation(pool, req, res);
-  const {title, artist, video_link} = req.body;
+  let {title, artist, video_link} = req.body;
+  if (title === "") title = "Unknown Title"
+  if (artist === "") artist = "Unknown Artist"
+  video_link = embedURL(video_link)
   const isDuplicate = await checkSongDuplicates(pool, user_id, video_link);
   if (!isDuplicate) {
     const queryText =

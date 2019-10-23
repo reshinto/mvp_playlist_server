@@ -1,21 +1,22 @@
 import {Router as route} from "express";
 import {sha256} from "js-sha256";
 import pool from "../config/db";
-import {checkBlanks, validateEmail} from "../handlers/utils";
+import {validation, checkBlanks, validateEmail} from "../handlers/utils";
 
 const router = route();
 const SALT = process.env.SALT;
 /**
  * GET home page
  */
-router.get('/', (req, res) => {
-  const queryText = "SELECT id, username, email, created_at FROM users;";
-  pool.query(queryText, (err, result) => {
+router.get('/user', async (req, res) => {
+  console.log(req.headers)
+  console.log(req.body)
+  const user_id = await validation(pool, req, res);
+  const queryText = "SELECT id, username, email, created_at FROM users WHERE id=$1;";
+  const values = [user_id];
+  pool.query(queryText, values, (err, result) => {
     if (!err) {
-      const data = {
-        users: result.rows
-      }
-      res.send(data);
+      res.send(result.rows);
     }
   })
 });
@@ -54,6 +55,7 @@ router.post("/register", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
+  console.log("working")
   const {username, password} = req.body;
   const queryText = `SELECT * from users WHERE username='${username}'`;
   pool.query(queryText, (err, result) => {
