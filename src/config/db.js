@@ -17,10 +17,10 @@ if ( process.env.DATABASE_URL ) {
   };
 } else {
   configs = {
-    user: "springfield",
-    host: "127.0.0.1",
-    database: "project2",
-    port: 5432,
+    user: process.env.USER,
+    host: process.env.HOST,
+    database: process.env.DATABASE,
+    port: process.env.port,
   };
 }
 
