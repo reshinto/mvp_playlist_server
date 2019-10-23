@@ -9,8 +9,6 @@ const SALT = process.env.SALT;
  * GET home page
  */
 router.get('/user', async (req, res) => {
-  console.log(req.headers)
-  console.log(req.body)
   const user_id = await validation(pool, req, res);
   const queryText = "SELECT id, username, email, created_at FROM users WHERE id=$1;";
   const values = [user_id];
@@ -22,7 +20,6 @@ router.get('/user', async (req, res) => {
 });
 
 router.post("/register", (req, res) => {
-  console.log(req.body)
   const {username, email, password} = req.body;
   const getBlanks = checkBlanks(req);
   if (getBlanks !== null) {
@@ -55,7 +52,6 @@ router.post("/register", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
-  console.log("working")
   const {username, password} = req.body;
   const queryText = `SELECT * from users WHERE username='${username}'`;
   pool.query(queryText, (err, result) => {
@@ -81,9 +77,5 @@ router.post("/login", (req, res) => {
     }
   });
 });
-
-// router.get("/logout", (req, res) => {
-//   res.status(200).send({message: 'Logout successfuly!'});
-// })
 
 export default router;

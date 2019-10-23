@@ -24,6 +24,7 @@ router.post("/songs", async (req, res) => {
   if (title === "") title = "Unknown Title"
   if (artist === "") artist = "Unknown Artist"
   video_link = embedURL(video_link)
+  if (video_link === "error") return res.status(403).send({message: 'Invalid URL!'})
   const isDuplicate = await checkSongDuplicates(pool, user_id, video_link);
   if (!isDuplicate) {
     const queryText =

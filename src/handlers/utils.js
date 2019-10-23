@@ -17,17 +17,18 @@ function validateEmail(email) {
 
 async function validation(pool, req, res) {
   const getUserId = req.headers.authorization;
-  let queryText = "SELECT user_id FROM songs";
+  let queryText = "SELECT id FROM users";
   const result = await pool.query(queryText);
   return verifyUser(getUserId, result);
 }
 
 function verifyUser(hashedId, result) {
+  console.log(result.rows)
   for (let i = 0; i < result.rows.length; i++) {
-    const user_id = result.rows[i].user_id;
-    const checkHashedUser = sha256(user_id + SALT);
+    const id = result.rows[i].id;
+    const checkHashedUser = sha256(id + SALT);
     console.log(hashedId === checkHashedUser);
-    if (hashedId === checkHashedUser) return user_id;
+    if (hashedId === checkHashedUser) return id;
   }
   return "";
 }
@@ -53,7 +54,10 @@ function getUrlId(url) {
 }
 
 function embedURL(url) {
-  return `https://www.youtube.com/embed/${getUrlId(url)}`;
+  const id = getUrlId(url);
+  console.log(id)
+  if (id !== "error") return `https://www.youtube.com/embed/${id}`;
+  else return "error";
 }
 
 export {checkBlanks, validateEmail, validation, checkSongDuplicates, embedURL};
