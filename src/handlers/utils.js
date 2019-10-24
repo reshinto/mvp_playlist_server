@@ -17,8 +17,6 @@ function validateEmail(email) {
 
 async function validation(pool, req, res) {
   const getUserId = req.headers.authorization;
-  console.log(req.headers)
-  console.log("get user id", getUrlId)
   let queryText = "SELECT id FROM users";
   const result = await pool.query(queryText);
   return verifyUser(getUserId, result);
@@ -27,7 +25,6 @@ async function validation(pool, req, res) {
 function verifyUser(hashedId, result) {
   for (let i = 0; i < result.rows.length; i++) {
     const id = result.rows[i].id;
-    console.log("verify id", id)
     const checkHashedUser = sha256(id + SALT);
     console.log(hashedId === checkHashedUser);
     if (hashedId === checkHashedUser) return parseInt(id);
@@ -39,27 +36,32 @@ async function checkSongDuplicates(pool, user_id, checkValue) {
   const queryText = "SELECT * FROM songs WHERE user_id=$1 AND video_link=$2";
   const values = [user_id, checkValue];
   const result = await pool.query(queryText, values);
-  console.log(result);
   if (result.rows.length !== 0) return true;
   else return false;
 }
 
 function getUrlId(url) {
-  var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  var match = url.match(regExp);
-
-  if (match && match[2].length == 11) {
-    return match[2];
-  } else {
-    return "error";
-  }
+  if (url.includes("youtube")) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    let match = url.match(regExp);
+    if (match && match[2].length == 11) {
+      return match[2];
+    } else {
+      return "error";
+    }
+  } else if (url.includes("dailymotion")) {
+    return url.slice(27);
+  } else return url;
 }
 
 function embedURL(url) {
   const id = getUrlId(url);
-  console.log(id)
-  if (id !== "error") return `https://www.youtube.com/embed/${id}`;
-  else return "error";
+  if (id !== "error") {
+    if (id.includes("http")) return id;
+    else if (id.includes("video"))
+      return `https://www.dailymotion.com/embed${id}`;
+    else return `https://www.youtube.com/embed/${id}`;
+  } else return "error";
 }
 
 export {checkBlanks, validateEmail, validation, checkSongDuplicates, embedURL};

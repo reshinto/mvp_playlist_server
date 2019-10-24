@@ -15,7 +15,7 @@ router.get('/user', async (req, res) => {
   pool.query(queryText, values, (err, result) => {
     if (!err) {
       res.send(result.rows);
-    }
+    } else res.status(304).send()
   })
 });
 

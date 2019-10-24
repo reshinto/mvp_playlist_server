@@ -5,6 +5,7 @@ import {validation, checkSongDuplicates, embedURL} from "../handlers/utils";
 const router = route();
 
 router.get("/songs", async (req, res) => {
+  console.log("running get songs")
   const user_id = await validation(pool, req, res);
   const queryText = "SELECT * FROM songs WHERE user_id=$1 ORDER BY added_at DESC;";
   const values = [user_id];
@@ -19,8 +20,10 @@ router.get("/songs", async (req, res) => {
 });
 
 router.post("/songs", async (req, res) => {
+  console.log("running add songs")
   const user_id = await validation(pool, req, res);
   let {title, artist, video_link} = req.body;
+  console.log(title, video_link)
   if (title === "") title = "Unknown Title"
   if (artist === "") artist = "Unknown Artist"
   video_link = embedURL(video_link)
@@ -42,9 +45,8 @@ router.post("/songs", async (req, res) => {
 });
 
 router.put("/songs", async (req, res) => {
+  console.log("running update songs")
   const {title, artist, video_link, id} = req.body;
-  console.log(req.body)
-  console.log("body", req.body)
   const user_id = await validation(pool, req, res);
   let queryText;
   let values;
@@ -55,7 +57,6 @@ router.put("/songs", async (req, res) => {
     queryText = "UPDATE songs SET title=$1, artist=$2, video_link=$3 WHERE user_id=$4 AND id=$5";
     values = [title, artist, video_link, user_id, parseInt(id)];
   }
-  console.log(queryText)
   await pool.query(queryText, values, (err, result) => {
     if (err) {
       console.log("query error", err.message);
@@ -67,10 +68,9 @@ router.put("/songs", async (req, res) => {
 });
 
 router.delete("/songs", async (req, res) => {
-  // id = song id
+  console.log("running delete song")
   const {id} = req.body;
   const user_id = await validation(pool, req, res);
-  console.log(user_id)
   const queryText = "DELETE FROM songs WHERE user_id=$1 AND id=$2";
   const values = [user_id, parseInt(id)];
   pool.query(queryText, values, (err, result) => {
