@@ -17,18 +17,20 @@ function validateEmail(email) {
 
 async function validation(pool, req, res) {
   const getUserId = req.headers.authorization;
+  console.log(req.headers)
+  console.log("get user id", getUrlId)
   let queryText = "SELECT id FROM users";
   const result = await pool.query(queryText);
   return verifyUser(getUserId, result);
 }
 
 function verifyUser(hashedId, result) {
-  console.log(result.rows)
   for (let i = 0; i < result.rows.length; i++) {
     const id = result.rows[i].id;
+    console.log("verify id", id)
     const checkHashedUser = sha256(id + SALT);
     console.log(hashedId === checkHashedUser);
-    if (hashedId === checkHashedUser) return id;
+    if (hashedId === checkHashedUser) return parseInt(id);
   }
   return "";
 }
