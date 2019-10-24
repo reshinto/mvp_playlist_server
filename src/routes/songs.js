@@ -6,7 +6,7 @@ const router = route();
 
 router.get("/songs", async (req, res) => {
   const user_id = await validation(pool, req, res);
-  const queryText = "SELECT * FROM songs WHERE user_id=$1";
+  const queryText = "SELECT * FROM songs WHERE user_id=$1 ORDER BY added_at DESC;";
   const values = [user_id];
   pool.query(queryText, values, (err, result) => {
     if (err) {
