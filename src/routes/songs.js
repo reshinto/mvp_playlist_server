@@ -1,13 +1,18 @@
 import {Router as route} from "express";
 import pool from "../config/db";
-import {validation, checkSongDuplicates, embedURL} from "../handlers/utils";
+import {
+  validation,
+  checkSongDuplicates,
+  getUrlId,
+  embedURL,
+} from "../handlers/utils";
 
 const router = route();
 
 router.get("/songs", async (req, res) => {
-  console.log("running get songs")
   const user_id = await validation(pool, req, res);
-  const queryText = "SELECT * FROM songs WHERE user_id=$1 ORDER BY added_at DESC;";
+  const queryText =
+    "SELECT * FROM songs WHERE user_id=$1 ORDER BY added_at DESC;";
   const values = [user_id];
   pool.query(queryText, values, (err, result) => {
     if (err) {
@@ -19,15 +24,38 @@ router.get("/songs", async (req, res) => {
   });
 });
 
+router.get("/song", async (req, res) => {
+  const {id} = req.query;
+  const user_id = await validation(pool, req, res);
+  const queryText =
+    "SELECT * FROM songs WHERE user_id=$1 AND id=$2;";
+  const values = [user_id, id];
+  pool.query(queryText, values, (err, result) => {
+    if (err) {
+      console.log("query error", err.message);
+      res.status(401).send({message: "Invalid user!"});
+    } else {
+      let {title, artist, video_link} = result.rows[0];
+      const song = [{
+        title,
+        artist,
+        video_link: embedURL(video_link)
+      }]
+      res.status(200).send(song);
+      console.log(song)
+    }
+  });
+});
+
 router.post("/songs", async (req, res) => {
-  console.log("running add songs")
   const user_id = await validation(pool, req, res);
   let {title, artist, video_link} = req.body;
-  console.log(title, video_link)
-  if (title === "") title = "Unknown Title"
-  if (artist === "") artist = "Unknown Artist"
-  video_link = embedURL(video_link)
-  if (video_link === "error") return res.status(403).send({message: 'Invalid URL!'})
+  if (title === "") title = "Unknown Title";
+  if (artist === "") artist = "Unknown Artist";
+  // video_link = embedURL(video_link);
+  video_link = getUrlId(video_link);
+  if (video_link === "error")
+    return res.status(403).send({message: "Invalid URL!"});
   const isDuplicate = await checkSongDuplicates(pool, user_id, video_link);
   if (!isDuplicate) {
     const queryText =
@@ -41,20 +69,24 @@ router.post("/songs", async (req, res) => {
         res.status(200).send({message: "Add song successfully!"});
       }
     });
-  } else res.status(403).send({message: 'This song has already been added!'});
+  } else res.status(403).send({message: "This song has already been added!"});
 });
 
 router.put("/songs", async (req, res) => {
-  console.log("running update songs")
-  const {title, artist, video_link, id} = req.body;
+  let {title, artist, video_link, id} = req.body;
   const user_id = await validation(pool, req, res);
   let queryText;
   let values;
   if (video_link === "") {
-    queryText = "UPDATE songs SET title=$1, artist=$2 WHERE user_id=$3 AND id=$4";
+    queryText =
+      "UPDATE songs SET title=$1, artist=$2 WHERE user_id=$3 AND id=$4";
     values = [title, artist, user_id, parseInt(id)];
   } else {
-    queryText = "UPDATE songs SET title=$1, artist=$2, video_link=$3 WHERE user_id=$4 AND id=$5";
+    video_link = getUrlId(video_link);
+    if (video_link === "error")
+      return res.status(403).send({message: "Invalid URL!"});
+    queryText =
+      "UPDATE songs SET title=$1, artist=$2, video_link=$3 WHERE user_id=$4 AND id=$5";
     values = [title, artist, video_link, user_id, parseInt(id)];
   }
   await pool.query(queryText, values, (err, result) => {
@@ -68,7 +100,6 @@ router.put("/songs", async (req, res) => {
 });
 
 router.delete("/songs", async (req, res) => {
-  console.log("running delete song")
   const {id} = req.body;
   const user_id = await validation(pool, req, res);
   const queryText = "DELETE FROM songs WHERE user_id=$1 AND id=$2";

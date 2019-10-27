@@ -26,7 +26,7 @@ function verifyUser(hashedId, result) {
   for (let i = 0; i < result.rows.length; i++) {
     const id = result.rows[i].id;
     const checkHashedUser = sha256(id + SALT);
-    console.log(hashedId === checkHashedUser);
+    // console.log(hashedId === checkHashedUser);
     if (hashedId === checkHashedUser) return parseInt(id);
   }
   return "";
@@ -64,4 +64,11 @@ function embedURL(url) {
   } else return "error";
 }
 
-export {checkBlanks, validateEmail, validation, checkSongDuplicates, embedURL};
+export {
+  checkBlanks,
+  validateEmail,
+  validation,
+  checkSongDuplicates,
+  getUrlId,
+  embedURL,
+};
