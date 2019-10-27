@@ -40,6 +40,14 @@ async function checkSongDuplicates(pool, user_id, checkValue) {
   else return false;
 }
 
+async function checkPlaylistDuplicates(pool, user_id, checkValue) {
+  const queryText = "SELECT * FROM playlists WHERE user_id=$1 AND name=$2";
+  const values = [user_id, checkValue];
+  const result = await pool.query(queryText, values);
+  if (result.rows.length !== 0) return true;
+  else return false;
+}
+
 function getUrlId(url) {
   if (url.includes("youtube")) {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -69,6 +77,7 @@ export {
   validateEmail,
   validation,
   checkSongDuplicates,
+  checkPlaylistDuplicates,
   getUrlId,
   embedURL,
 };
