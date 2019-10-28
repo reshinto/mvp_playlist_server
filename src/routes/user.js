@@ -10,7 +10,7 @@ const SALT = process.env.SALT;
  */
 router.get('/user', async (req, res) => {
   const user_id = await validation(pool, req, res);
-  const queryText = "SELECT id, username, email, created_at FROM users WHERE id=$1;";
+  const queryText = "SELECT user_id, username, email, created_at FROM users WHERE user_id=$1;";
   const values = [user_id];
   pool.query(queryText, values, (err, result) => {
     if (!err) {
@@ -40,10 +40,11 @@ router.post("/register", (req, res) => {
       }
       res.status(403).send(errMsg);
     } else {
-      queryText = "SELECT id FROM users WHERE username=$1;";
+      queryText = "SELECT user_id FROM users WHERE username=$1;";
       values = [username]
       pool.query(queryText, values, (err, result) => {
-        const user_id = result.rows[0].id;
+        console.log(result.rows)
+        const user_id = result.rows[0].user_id;
         const token = sha256(user_id + SALT);
         res.status(200).send({bearer: token});
       })
@@ -53,8 +54,9 @@ router.post("/register", (req, res) => {
 
 router.post("/login", (req, res) => {
   const {username, password} = req.body;
-  const queryText = `SELECT * from users WHERE username='${username}'`;
-  pool.query(queryText, (err, result) => {
+  const queryText = "SELECT * from users WHERE username=$1";
+  const values = [username]
+  pool.query(queryText, values, (err, result) => {
     if (err) {
       console.error("query error:", err.stack);
       res.send( "query error" );
@@ -65,7 +67,7 @@ router.post("/login", (req, res) => {
         const hashedRequestPassword = sha256( password + SALT );
         // check to see if the password in request.body matches what's in the db
         if ( hashedRequestPassword === result.rows[0].password ) {
-          const user_id = result.rows[0].id;
+          const user_id = result.rows[0].user_id;
           const token = sha256(user_id + SALT);
           res.status(200).send({bearer: token});
         } else {

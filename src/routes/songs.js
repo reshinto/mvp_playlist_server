@@ -28,7 +28,7 @@ router.get("/song", async (req, res) => {
   const {id} = req.query;
   const user_id = await validation(pool, req, res);
   const queryText =
-    "SELECT * FROM songs WHERE user_id=$1 AND id=$2;";
+    "SELECT * FROM songs WHERE user_id=$1 AND song_id=$2;";
   const values = [user_id, id];
   pool.query(queryText, values, (err, result) => {
     if (err) {
@@ -48,10 +48,14 @@ router.get("/song", async (req, res) => {
 });
 
 router.post("/songs", async (req, res) => {
+  let domain;
   const user_id = await validation(pool, req, res);
   let {title, artist, video_link} = req.body;
   if (title === "") title = "Unknown Title";
   if (artist === "") artist = "Unknown Artist";
+  if (video_link.includes("youtube")) {
+    domain = "youtube";
+  } else domain = "unknown";
   // video_link = embedURL(video_link);
   video_link = getUrlId(video_link);
   if (video_link === "error")
@@ -59,8 +63,8 @@ router.post("/songs", async (req, res) => {
   const isDuplicate = await checkSongDuplicates(pool, user_id, video_link);
   if (!isDuplicate) {
     const queryText =
-      "INSERT INTO songs (title, artist, video_link, user_id) VALUES ($1, $2, $3, $4) RETURNING *";
-    const values = [title, artist, video_link, user_id];
+      "INSERT INTO songs (title, artist, video_link, domain, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING *";
+    const values = [title, artist, video_link, domain, user_id];
     pool.query(queryText, values, (err, result) => {
       if (err) {
         console.log("query error", err.message);
@@ -73,21 +77,25 @@ router.post("/songs", async (req, res) => {
 });
 
 router.put("/songs", async (req, res) => {
+  let domain;
   let {title, artist, video_link, id} = req.body;
   const user_id = await validation(pool, req, res);
+  if (video_link.includes("youtube")) {
+    domain = "youtube";
+  } else domain = "unknown";
   let queryText;
   let values;
   if (video_link === "") {
     queryText =
-      "UPDATE songs SET title=$1, artist=$2 WHERE user_id=$3 AND id=$4";
+      "UPDATE songs SET title=$1, artist=$2 WHERE user_id=$3 AND song_id=$4";
     values = [title, artist, user_id, parseInt(id)];
   } else {
     video_link = getUrlId(video_link);
     if (video_link === "error")
       return res.status(403).send({message: "Invalid URL!"});
     queryText =
-      "UPDATE songs SET title=$1, artist=$2, video_link=$3 WHERE user_id=$4 AND id=$5";
-    values = [title, artist, video_link, user_id, parseInt(id)];
+      "UPDATE songs SET title=$1, artist=$2, video_link=$3, domain=$4 WHERE user_id=$5 AND song_id=$6";
+    values = [title, artist, video_link, domain, user_id, parseInt(id)];
   }
   await pool.query(queryText, values, (err, result) => {
     if (err) {
@@ -102,7 +110,7 @@ router.put("/songs", async (req, res) => {
 router.delete("/songs", async (req, res) => {
   const {id} = req.body;
   const user_id = await validation(pool, req, res);
-  const queryText = "DELETE FROM songs WHERE user_id=$1 AND id=$2";
+  const queryText = "DELETE FROM songs WHERE user_id=$1 AND song_id=$2";
   const values = [user_id, parseInt(id)];
   pool.query(queryText, values, (err, result) => {
     if (err) {

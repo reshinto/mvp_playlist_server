@@ -26,7 +26,7 @@ router.get("/playlist", async (req, res) => {
   const {id} = req.query;
   const user_id = await validation(pool, req, res);
   const queryText =
-    "SELECT * FROM playlists WHERE user_id=$1 AND id=$2;";
+    "SELECT * FROM playlists WHERE user_id=$1 AND playlist_id=$2;";
   const values = [user_id, id];
   pool.query(queryText, values, (err, result) => {
     if (err) {
@@ -65,7 +65,7 @@ router.put("/playlist", async (req, res) => {
   let queryText;
   let values;
   queryText =
-    "UPDATE playlists SET name=$1 WHERE user_id=$2 AND id=$3";
+    "UPDATE playlists SET name=$1 WHERE user_id=$2 AND playlist_id=$3";
   values = [name, user_id, parseInt(id)];
   await pool.query(queryText, values, (err, result) => {
     if (err) {
@@ -80,7 +80,7 @@ router.put("/playlist", async (req, res) => {
 router.delete("/playlist", async (req, res) => {
   const {id} = req.body;
   const user_id = await validation(pool, req, res);
-  const queryText = "DELETE FROM playlists WHERE user_id=$1 AND id=$2";
+  const queryText = "DELETE FROM playlists WHERE user_id=$1 AND playlist_id=$2";
   const values = [user_id, parseInt(id)];
   pool.query(queryText, values, (err, result) => {
     if (err) {
