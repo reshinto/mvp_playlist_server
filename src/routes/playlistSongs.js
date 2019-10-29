@@ -9,7 +9,7 @@ router.get("/playlistsongs", async (req, res) => {
   const user_id = await validation(pool, req, res);
   const queryText =
     "SELECT * FROM playlist_songs INNER JOIN playlists ON (playlist_songs.playlist_id = playlists.playlist_id) INNER JOIN songs ON (playlist_songs.song_id = songs.song_id) WHERE playlist_songs.user_id=$1 AND playlist_songs.playlist_id=$2 ORDER BY updated_at DESC;";
-  const values = [user_id, id];
+  const values = [user_id, parseInt(id)];
   pool.query(queryText, values, (err, result) => {
     if (err) {
       console.log("query error", err.message);
@@ -25,7 +25,7 @@ router.get("/playlistsong", async (req, res) => {
   const user_id = await validation(pool, req, res);
   const queryText =
     "SELECT * FROM playlist_songs INNER JOIN playlists ON (playlist_songs.playlist_id = playlists.playlist_id) INNER JOIN songs ON (playlist_songs.song_id = songs.song_id) WHERE playlist_songs.user_id=$1 AND playlist_songs.playlist_songs_id=$2 ORDER BY updated_at DESC;";
-  const values = [user_id, id];
+  const values = [user_id, parseInt(id)];
   pool.query(queryText, values, (err, result) => {
     if (err) {
       console.log("query error", err.message);
