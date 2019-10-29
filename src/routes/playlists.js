@@ -47,7 +47,7 @@ router.post("/playlist", async (req, res) => {
     const queryText =
       "INSERT INTO playlists (user_id, name) VALUES ($1, $2) RETURNING *";
     const values = [user_id, name];
-    console.log(values)
+    // console.log(values)
     pool.query(queryText, values, (err, result) => {
       if (err) {
         console.log("query error", err.message);

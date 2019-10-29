@@ -42,7 +42,7 @@ router.get("/song", async (req, res) => {
         video_link: embedURL(video_link)
       }]
       res.status(200).send(song);
-      console.log(song)
+      // console.log(song)
     }
   });
 });

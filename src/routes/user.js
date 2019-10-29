@@ -43,7 +43,7 @@ router.post("/register", (req, res) => {
       queryText = "SELECT user_id FROM users WHERE username=$1;";
       values = [username]
       pool.query(queryText, values, (err, result) => {
-        console.log(result.rows)
+        // console.log(result.rows)
         const user_id = result.rows[0].user_id;
         const token = sha256(user_id + SALT);
         res.status(200).send({bearer: token});
@@ -61,7 +61,7 @@ router.post("/login", (req, res) => {
       console.error("query error:", err.stack);
       res.send( "query error" );
     } else {
-      console.log("query result:", result.rows);
+      // console.log("query result:", result.rows);
       // if this user exists in the db
       if ( result.rows.length > 0 ) {
         const hashedRequestPassword = sha256( password + SALT );
